@@ -37,10 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_attendance'])) {
             Database::beginTransaction();
             try {
                 $savedCount = 0;
+                $counts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
                 foreach ($attendanceData as $stuId => $status) {
                     $stuId = (int)$stuId;
                     $status = in_array($status, ['present', 'absent', 'late', 'excused']) ? $status : 'present';
                     $remark = trim($remarksData[$stuId] ?? '');
+                    $counts[$status]++;
 
                     // Prevent duplicates with unique key on (student_id, attendance_date)
                     Database::insert(
@@ -51,6 +53,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_attendance'])) {
                     );
                     $savedCount++;
                 }
+
+                // Sync attendance_submissions table
+                Database::query(
+                    "INSERT INTO attendance_submissions (session_id, class_id, section_id, attendance_date, submitted_by, total_students, present_count, absent_count, late_count, excused_count, submitted_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                     ON DUPLICATE KEY UPDATE 
+                        submitted_by = VALUES(submitted_by),
+                        total_students = VALUES(total_students),
+                        present_count = VALUES(present_count),
+                        absent_count = VALUES(absent_count),
+                        late_count = VALUES(late_count),
+                        excused_count = VALUES(excused_count),
+                        updated_at = NOW()",
+                    [$sessionId, $postClassId, $postSectionId, $postDate, $_SESSION['user_id'], $savedCount, $counts['present'], $counts['absent'], $counts['late'], $counts['excused']]
+                );
 
                 Database::commit();
                 logActivity('attendance_marked', "Recorded attendance for Class ID {$postClassId}, Sec ID {$postSectionId} on {$postDate} ({$savedCount} students)");

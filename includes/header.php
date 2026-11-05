@@ -124,8 +124,8 @@ $metaDesc = getSetting('website_meta_description', '');
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle <?= isActivePage('admission') ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admission</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="<?= url('admission.php') ?>">Admission Info</a></li>
-                            <li><a class="dropdown-item" href="<?= url('admission-apply.php') ?>">Apply Online</a></li>
+                            <li><a class="dropdown-item" href="<?= url('admission-info.php') ?>">Admission Info</a></li>
+                            <li><a class="dropdown-item" href="<?= url('admission.php') ?>">Apply Online</a></li>
                         </ul>
                     </li>
 
@@ -152,7 +152,10 @@ $metaDesc = getSetting('website_meta_description', '');
                     <!-- Login / Dashboard Button -->
                     <li class="nav-item ms-lg-2">
                         <?php if (isLoggedIn()): ?>
-                            <a class="btn btn-sm px-3 py-2" href="<?= url('admin/index.php') ?>" style="background-color: #198754; color: #fff;">
+                            <?php 
+                            $dashUrl = isAdmin() ? url('admin/dashboard.php') : (isHeadmaster() ? url('headmaster/dashboard.php') : url('teacher/dashboard.php')); 
+                            ?>
+                            <a class="btn btn-sm px-3 py-2" href="<?= $dashUrl ?>" style="background-color: #198754; color: #fff;">
                                 <i class="fas fa-tachometer-alt me-1"></i> Dashboard
                             </a>
                         <?php else: ?>

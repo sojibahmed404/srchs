@@ -60,14 +60,52 @@ function csrfField(): string {
 }
 
 /**
- * Verify CSRF token
+ * Clean and sanitize user input
  */
-function verifyCSRFToken(): bool {
-    $token = $_POST['csrf_token'] ?? '';
+function cleanInput($value): string {
+    if (is_array($value)) return '';
+    return trim(htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'));
+}
+
+/**
+ * Verify CSRF token (supports direct parameter, POST, or GET)
+ */
+function verifyCSRFToken(?string $token = null): bool {
+    if ($token === null) {
+        $token = $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? '';
+    }
     if (empty($token) || empty($_SESSION['csrf_token'])) {
         return false;
     }
     return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+/**
+ * Resolve upload URL with fallback
+ */
+function resolveUploadUrl(?string $path, string $default = 'assets/images/default-avatar.png'): string {
+    if (!empty($path)) {
+        $fullPath = ROOT_PATH . '/' . ltrim($path, '/');
+        if (file_exists($fullPath)) {
+            return asset($path);
+        }
+    }
+    return asset($default);
+}
+
+/**
+ * Get current teacher profile record with joined user information
+ */
+function getCurrentTeacher(?int $userId = null): ?array {
+    $uid = $userId ?? ($_SESSION['user_id'] ?? 0);
+    if (!$uid) return null;
+    return Database::fetchOne(
+        "SELECT t.*, u.full_name, u.email, u.phone, u.avatar, u.username, u.status as user_status
+         FROM teachers t
+         JOIN users u ON t.user_id = u.id
+         WHERE t.user_id = ?",
+        [$uid]
+    );
 }
 
 /**

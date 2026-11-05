@@ -166,6 +166,11 @@ $teacherId = $teacherRecord ? (int)$teacherRecord['id'] : 0;
         <a href="<?= url('teacher/profile.php') ?>" class="nav-link <?= isActivePage('profile') ?>">
             <i class="fas fa-user-cog"></i> My Profile
         </a>
+        <?php if (isHeadmaster()): ?>
+            <a href="<?= url('headmaster/dashboard.php') ?>" class="nav-link text-warning">
+                <i class="fas fa-crown text-warning"></i> Head Sir Monitoring
+            </a>
+        <?php endif; ?>
 
         <div class="px-3 pt-3 mt-4 border-top border-secondary">
             <a href="<?= url('index.php') ?>" target="_blank" class="btn btn-outline-light btn-sm w-100 rounded-pill mb-2">

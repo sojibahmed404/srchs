@@ -69,8 +69,8 @@ function loginUser(string $username, string $password): array {
     $_SESSION['logged_in'] = true;
     $_SESSION['login_time'] = time();
 
-    // If teacher, store teacher_id
-    if ($user['role_name'] === 'teacher') {
+    // If teacher or headmaster, store teacher_id
+    if ($user['role_name'] === 'teacher' || $user['role_name'] === 'headmaster') {
         $teacher = Database::fetchOne("SELECT id FROM teachers WHERE user_id = ?", [$user['id']]);
         if ($teacher) {
             $_SESSION['teacher_id'] = (int)$teacher['id'];
@@ -83,8 +83,10 @@ function loginUser(string $username, string $password): array {
     // Log activity
     logActivity('login', 'User logged in successfully', $user['id']);
 
-    // Regenerate session ID
-    session_regenerate_id(true);
+    // Regenerate session ID if headers not sent
+    if (!headers_sent()) {
+        session_regenerate_id(true);
+    }
 
     return ['success' => true, 'role' => $user['role_name']];
 }
@@ -139,6 +141,20 @@ function isTeacher(): bool {
 }
 
 /**
+ * Check if user is Head Sir / Headmaster
+ */
+function isHeadmaster(): bool {
+    return hasRole('headmaster');
+}
+
+/**
+ * Check if user is Head Sir or Admin
+ */
+function isHeadmasterOrAdmin(): bool {
+    return isAdmin() || isHeadmaster();
+}
+
+/**
  * Require login - redirect to login page if not authenticated
  */
 function requireLogin(): void {
@@ -172,8 +188,30 @@ function requireAdmin(): void {
  */
 function requireTeacher(): void {
     requireLogin();
-    if (!isTeacher()) {
+    if (!isTeacher() && !isHeadmaster()) {
         setFlash('danger', 'Access denied. Teacher privileges required.');
+        redirect(url('auth/login.php'));
+    }
+}
+
+/**
+ * Require Head Sir role
+ */
+function requireHeadmaster(): void {
+    requireLogin();
+    if (!isHeadmaster()) {
+        setFlash('danger', 'Access denied. Head Sir monitoring privileges required.');
+        redirect(url('auth/login.php'));
+    }
+}
+
+/**
+ * Require Head Sir or Admin role
+ */
+function requireHeadmasterOrAdmin(): void {
+    requireLogin();
+    if (!isHeadmaster() && !isAdmin()) {
+        setFlash('danger', 'Access denied. Authorized monitoring privileges required.');
         redirect(url('auth/login.php'));
     }
 }

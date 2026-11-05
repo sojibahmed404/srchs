@@ -266,6 +266,30 @@ try {
             <?php endif; ?>
         </div>
     </div>
+    <!-- Recent Notices & Announcements -->
+    <?php if (!empty($recentNotices)): ?>
+    <div class="col-12 mt-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h6 class="fw-bold text-dark mb-3">
+                <i class="fas fa-bullhorn text-warning me-2"></i> Recent School Notices & Circulars
+            </h6>
+            <div class="row g-3">
+                <?php foreach ($recentNotices as $n): ?>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 bg-light border-start border-4 border-success">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-success-subtle text-success"><?= e($n['category']) ?></span>
+                                <small class="text-muted"><?= formatDate($n['published_date'], 'd M Y') ?></small>
+                            </div>
+                            <div class="fw-bold text-dark mb-1"><?= e($n['title']) ?></div>
+                            <p class="text-muted small mb-0"><?= truncate(e($n['content']), 110) ?></p>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -209,6 +209,9 @@ $pendingAdmissions = (int)Database::fetchColumn("SELECT COUNT(*) FROM admissions
         </a>
 
         <div class="sidebar-heading">System Administration</div>
+        <a href="<?= url('headmaster/dashboard.php') ?>" class="nav-link text-warning">
+            <i class="fas fa-crown text-warning"></i> Head Sir Console
+        </a>
         <a href="<?= url('admin/users/index.php') ?>" class="nav-link <?= isActivePage('users') ?>">
             <i class="fas fa-users-cog"></i> User Accounts
         </a>

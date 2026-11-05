@@ -24,6 +24,19 @@ try {
     $todayTotalMarked = (int)Database::fetchColumn("SELECT COUNT(*) FROM attendance WHERE attendance_date = ?", [$todayDate]);
     $attendanceRate = $todayTotalMarked > 0 ? round(($todayPresent / $todayTotalMarked) * 100, 1) : 0;
 
+    // Past 7 Days Attendance Trend (Actual Data)
+    $chartDays = [];
+    $chartRates = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $d = date('Y-m-d', strtotime("-$i days"));
+        $dLabel = ($i === 0) ? 'Today' : date('D', strtotime($d));
+        $presentCount = (int)Database::fetchColumn("SELECT COUNT(*) FROM attendance WHERE attendance_date = ? AND status = 'present'", [$d]);
+        $totalCount = (int)Database::fetchColumn("SELECT COUNT(*) FROM attendance WHERE attendance_date = ?", [$d]);
+        $rate = $totalCount > 0 ? round(($presentCount / $totalCount) * 100, 1) : 0;
+        $chartDays[] = $dLabel;
+        $chartRates[] = $rate;
+    }
+
     // Recent 5 Admissions
     $recentAdmissions = Database::fetchAll(
         "SELECT a.*, c.class_name 
@@ -267,10 +280,10 @@ document.addEventListener('DOMContentLoaded', function () {
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Sun', 'Today'],
+                labels: <?= json_encode($chartDays) ?>,
                 datasets: [{
                     label: 'Attendance Rate (%)',
-                    data: [88, 92, 90, 94, 91, 93, <?= $attendanceRate > 0 ? $attendanceRate : 92 ?>],
+                    data: <?= json_encode($chartRates) ?>,
                     borderColor: '#198754',
                     backgroundColor: 'rgba(25, 135, 84, 0.1)',
                     tension: 0.35,
