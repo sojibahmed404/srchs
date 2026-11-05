@@ -1,0 +1,17 @@
+# Operating System Files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# IDE / Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary / Scratch Files
+test.txt
+*.log
+
+# Sensitive / Environment Overrides if any
+# (Note: database/school_management.sql is preserved for setup)
